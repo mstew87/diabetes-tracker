@@ -38,7 +38,7 @@ class GlucoseReading(models.Model):
     )
 
     class Meta:
-        ordering = ['-timestamp']
+        ordering = ['timestamp']
 
     def __str__(self):
         return f"{self.user.username}'s reading: {self.glucose_level} mg/dL on {self.timestamp.strftime('%Y-%m-%d %H:%M')}"

@@ -1,0 +1,183 @@
+/* Main Styling for Diabetes Tracker App */
+
+/* Custom Variables */
+:root {
+    --primary-color: #1e88e5;
+    --primary-dark: #0d47a1;
+    --primary-light: #4fc3f7;
+    --success-color: #43a047;
+    --warning-color: #ffa000;
+    --danger-color: #e53935;
+    --gray-dark: #343a40;
+    --gray-light: #f8f9fa;
+}
+
+/* General Styles */
+body {
+    background-color: #f5f5f5;
+    color: #333;
+    font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    padding-top: 70px;
+    padding-bottom: 30px;
+    min-height: 100vh;
+}
+
+/* Card Styling */
+.card {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    border: none;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    font-weight: 500;
+}
+
+/* Button Styling */
+.btn {
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: 700;
+    color: var(--primary-color) !important;
+}
+
+/* Forms */
+.form-control:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem rgba(30, 136, 229, 0.25);
+}
+
+/* Glucose reading indicators */
+.reading-high {
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+.reading-low {
+    color: var(--warning-color);
+    font-weight: bold;
+}
+
+.reading-normal {
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+/* Date Picker Enhancements */
+input[type="date"], input[type="time"] {
+    background-color: white;
+    cursor: pointer;
+}
+
+/* Statistics boxes on dashboard */
+.stats-box {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+.stats-box:hover {
+    transform: translateY(-5px);
+}
+
+/* Responsive Tweaks */
+@media (max-width: 768px) {
+    body {
+        padding-top: 60px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .no-print {
+        display: none;
+    }
+    
+    body {
+        padding: 0;
+        background-color: white;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+/* Table styling */
+.table th {
+    background-color: #f5f5f5;
+    font-weight: 500;
+}
+
+/* Background for alternate rows */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Interactive Hover States */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.075);
+}
+
+/* Alert Styling */
+.alert {
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Pagination Styling */
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.pagination .page-link {
+    color: var(--primary-color);
+}
+
+/* Chart containers */
+.chart-container {
+    position: relative;
+    margin: auto;
+    height: 300px;
+    width: 100%;
+} 

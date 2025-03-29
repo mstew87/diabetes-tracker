@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - Diabetes Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Glucose Reports</h2>
+    <div>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+
+{% if stats %}
+    <div class="row">
+        {% for period_name, period_stats in stats.items %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            {% if period_name == 'week' %}Last 7 Days
+                            {% elif period_name == 'month' %}Last 30 Days
+                            {% elif period_name == 'quarter' %}Last 90 Days
+                            {% elif period_name == 'year' %}Last 365 Days
+                            {% else %}{{ period_name|title }}
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="text-center mb-3">
+                                    <h6>Readings</h6>
+                                    <h3>{{ period_stats.count }}</h3>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center mb-3">
+                                    <h6>Average</h6>
+                                    <h3>{{ period_stats.avg|floatformat:0 }} <small>mg/dL</small></h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h6>Lowest</h6>
+                                    <h3 class="{% if period_stats.min < 70 %}text-warning{% endif %}">
+                                        {{ period_stats.min|floatformat:0 }} <small>mg/dL</small>
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h6>Highest</h6>
+                                    <h3 class="{% if period_stats.max > 180 %}text-danger{% endif %}">
+                                        {{ period_stats.max|floatformat:0 }} <small>mg/dL</small>
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-grid">
+                            {% if period_name == 'week' %}
+                                <a href="{% url 'trends' %}?period=7" class="btn btn-outline-primary">View Detailed Trends</a>
+                            {% elif period_name == 'month' %}
+                                <a href="{% url 'trends' %}?period=30" class="btn btn-outline-primary">View Detailed Trends</a>
+                            {% elif period_name == 'quarter' %}
+                                <a href="{% url 'trends' %}?period=90" class="btn btn-outline-primary">View Detailed Trends</a>
+                            {% elif period_name == 'year' %}
+                                <a href="{% url 'trends' %}?period=365" class="btn btn-outline-primary">View Detailed Trends</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Glucose Level Targets</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="alert alert-success">
+                                <h5 class="alert-heading">Target Range</h5>
+                                <p class="mb-0">70-180 mg/dL</p>
+                                <hr>
+                                <p class="mb-0"><small>American Diabetes Association recommended range</small></p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert alert-warning">
+                                <h5 class="alert-heading">Low</h5>
+                                <p class="mb-0">Below 70 mg/dL</p>
+                                <hr>
+                                <p class="mb-0"><small>May require immediate attention</small></p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert alert-danger">
+                                <h5 class="alert-heading">High</h5>
+                                <p class="mb-0">Above 180 mg/dL</p>
+                                <hr>
+                                <p class="mb-0"><small>May require medication adjustment</small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <h5>No Data Available</h5>
+        <p>You don't have any glucose readings recorded yet. Start tracking your glucose to see reports.</p>
+        <a href="{% url 'add_reading' %}" class="btn btn-primary mt-2">
+            <i class="fas fa-plus me-1"></i>Add Reading
+        </a>
+    </div>
+{% endif %}
+
+<div class="mt-4 text-center">
+    <a href="#" class="btn btn-outline-secondary" onclick="window.print(); return false;">
+        <i class="fas fa-print me-1"></i>Print Report
+    </a>
+</div>
+
+{% endblock %}

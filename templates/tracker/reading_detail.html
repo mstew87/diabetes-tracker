@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Reading Details - Diabetes Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Reading Details</h2>
+    <div>
+        <a href="{% url 'reading_list' %}" class="btn btn-secondary me-2">
+            <i class="fas fa-arrow-left me-1"></i>Back to List
+        </a>
+        <a href="{% url 'edit_reading' reading.id %}" class="btn btn-primary">
+            <i class="fas fa-edit me-1"></i>Edit
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            Glucose Reading from {{ reading.timestamp|date:"F j, Y - h:i A" }}
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table">
+                    <tr>
+                        <th>Glucose Level:</th>
+                        <td>
+                            <span class="badge bg-{% if reading.glucose_level > 180 %}danger{% elif reading.glucose_level < 70 %}warning{% else %}success{% endif %} fs-6">
+                                {{ reading.glucose_level }} mg/dL
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>When:</th>
+                        <td>{{ reading.get_reading_time_display }}</td>
+                    </tr>
+                    <tr>
+                        <th>Carbs:</th>
+                        <td>{{ reading.carbs|default:"Not recorded" }} {% if reading.carbs %}g{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th>Insulin:</th>
+                        <td>{{ reading.insulin|default:"Not recorded" }} {% if reading.insulin %}units{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th>Date & Time:</th>
+                        <td>{{ reading.timestamp|date:"F j, Y - h:i A" }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h6 class="mb-0">Notes</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if reading.notes %}
+                            <p>{{ reading.notes|linebreaks }}</p>
+                        {% else %}
+                            <p class="text-muted">No notes for this reading.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-between">
+            <small class="text-muted">
+                <strong>Entry ID:</strong> {{ reading.id }}
+            </small>
+            <a href="{% url 'delete_reading' reading.id %}" class="btn btn-sm btn-danger">
+                <i class="fas fa-trash me-1"></i>Delete this Reading
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

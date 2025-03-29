@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Diabetes Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Dashboard</h2>
+    <a href="{% url 'add_reading' %}" class="btn btn-success">
+        <i class="fas fa-plus me-1"></i>Add New Reading
+    </a>
+</div>
+
+{% if stats.total_readings > 0 %}
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Total Readings</h5>
+                    <p class="display-4">{{ stats.total_readings }}</p>
+                    <p class="text-muted">Last 30 days</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Average Glucose</h5>
+                    <p class="display-4">{{ stats.avg_glucose|floatformat:0 }}</p>
+                    <p class="text-muted">mg/dL</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Highest Reading</h5>
+                    <p class="display-4 {% if stats.max_glucose > 180 %}text-danger{% endif %}">
+                        {{ stats.max_glucose|floatformat:0 }}
+                    </p>
+                    <p class="text-muted">mg/dL</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Lowest Reading</h5>
+                    <p class="display-4 {% if stats.min_glucose < 70 %}text-warning{% endif %}">
+                        {{ stats.min_glucose|floatformat:0 }}
+                    </p>
+                    <p class="text-muted">mg/dL</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Glucose Trend (Last 30 Days)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="glucoseChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Average by Time of Day</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="timeOfDayChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Links</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'reading_list' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-list me-1"></i>View All Readings
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'trends' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-chart-line me-1"></i>Analyze Trends
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'prediction' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-brain me-1"></i>Glucose Prediction
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <h3>Welcome to Your Diabetes Tracker!</h3>
+            <p class="lead">You haven't added any glucose readings in the last 30 days.</p>
+            <p>Start tracking your glucose levels to see insights and trends.</p>
+            <a href="{% url 'add_reading' %}" class="btn btn-lg btn-primary mt-3">
+                <i class="fas fa-plus me-1"></i>Add Your First Reading
+            </a>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if stats.total_readings > 0 %}
+            // Glucose trend chart
+            const glucoseCtx = document.getElementById('glucoseChart').getContext('2d');
+            const glucoseChart = new Chart(glucoseCtx, {
+                type: 'line',
+                data: {
+                    labels: {{ dates_json|safe }},
+                    datasets: [{
+                        label: 'Glucose Level (mg/dL)',
+                        data: {{ glucose_values_json|safe }},
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: Math.max(0, {{ stats.min_glucose|floatformat:0 }} - 20),
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' mg/dL';
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxTicksLimit: 10
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Time of day chart
+            const timeCtx = document.getElementById('timeOfDayChart').getContext('2d');
+            const timeChart = new Chart(timeCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ reading_time_labels_json|safe }},
+                    datasets: [{
+                        label: 'Average Glucose (mg/dL)',
+                        data: {{ reading_time_values_json|safe }},
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)',
+                            'rgba(255, 159, 64, 0.6)',
+                            'rgba(199, 199, 199, 0.6)',
+                            'rgba(83, 102, 255, 0.6)',
+                            'rgba(40, 159, 64, 0.6)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' mg/dL';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        {% endif %}
+    });
+</script>
+{% endblock %}

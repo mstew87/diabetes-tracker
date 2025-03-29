@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Trends Analysis - Diabetes Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Glucose Trends Analysis</h2>
+    <div>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Time Period</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="row align-items-center">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="period">Show data for the last:</label>
+                            <select name="period" id="period" class="form-select" onchange="this.form.submit()">
+                                <option value="7" {% if days == 7 %}selected{% endif %}>7 days</option>
+                                <option value="14" {% if days == 14 %}selected{% endif %}>14 days</option>
+                                <option value="30" {% if days == 30 %}selected{% endif %}>30 days</option>
+                                <option value="90" {% if days == 90 %}selected{% endif %}>90 days</option>
+                                <option value="180" {% if days == 180 %}selected{% endif %}>6 months</option>
+                                <option value="365" {% if days == 365 %}selected{% endif %}>1 year</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Daily Average Glucose</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="dailyChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Weekly Trends</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="weeklyChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Time of Day Patterns</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="timePatternChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Key Insights</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">This analysis shows your glucose patterns over the last {{ days }} days. Look for:</p>
+                <ul>
+                    <li>Consistent high or low readings at certain times of day</li>
+                    <li>Day-to-day variability in your glucose levels</li>
+                    <li>Weekly patterns that might relate to your schedule</li>
+                    <li>Correlation between meals, medication, and glucose levels</li>
+                </ul>
+                <p>Share these trends with your healthcare provider at your next appointment.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Daily chart
+        const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+        new Chart(dailyCtx, {
+            type: 'line',
+            data: {
+                labels: {{ daily_dates_json|safe }},
+                datasets: [{
+                    label: 'Average Glucose (mg/dL)',
+                    data: {{ daily_values_json|safe }},
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'mg/dL'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Weekly chart
+        const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+        new Chart(weeklyCtx, {
+            type: 'line',
+            data: {
+                labels: {{ weekly_dates_json|safe }},
+                datasets: [{
+                    label: 'Weekly Average (mg/dL)',
+                    data: {{ weekly_values_json|safe }},
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+
+        // Time pattern chart
+        const timePatternCtx = document.getElementById('timePatternChart').getContext('2d');
+        new Chart(timePatternCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ time_pattern_labels_json|safe }},
+                datasets: [{
+                    label: 'Average Glucose (mg/dL)',
+                    data: {{ time_pattern_values_json|safe }},
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)',
+                        'rgba(255, 159, 64, 0.6)',
+                        'rgba(199, 199, 199, 0.6)',
+                        'rgba(83, 102, 255, 0.6)',
+                        'rgba(40, 159, 64, 0.6)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'mg/dL'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

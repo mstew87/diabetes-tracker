@@ -24,6 +24,7 @@ urlpatterns = [
     path('', include('analytics.urls')),  # Dashboard as homepage
     path('readings/', include('tracker.urls')),
     path('users/', include('users.urls')),
+    path('tz_detect/', include('tz_detect.urls')),  # Timezone detection
 ]
 
 if settings.DEBUG:
